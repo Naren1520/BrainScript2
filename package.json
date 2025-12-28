@@ -1,0 +1,13 @@
+{
+  "name": "learnstream",
+  "version": "1.0.0",
+  "description": "LearnStream - Full Stack Learning Application",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run frontend\"",
+    "server": "cd server && npm start",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
