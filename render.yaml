@@ -26,6 +26,16 @@ services:
         value: python3
       - key: TRANSCRIPT_LANGS
         value: en,en-US,en-GB,en-IN,hi
+      - key: GEMINI_API_KEY_QUIZ
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
 
   # --------------------------------------------------------------------------------
   # FRONTEND (Static Site)
@@ -43,3 +53,5 @@ services:
           type: web
           name: BrainScript-backend
           property: url
+      - key: VITE_GEMINI_API_KEY
+        sync: false
