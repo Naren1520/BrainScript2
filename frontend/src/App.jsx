@@ -23,6 +23,12 @@ import About from "./pages/About/About";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+// Debug: Log API URL on app load
+if (typeof window !== "undefined") {
+  console.log("🔗 API Base URL:", BASE_URL);
+  console.log("🔗 VITE_API_URL env:", import.meta.env.VITE_API_URL);
+}
+
 export default function App() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
