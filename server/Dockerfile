@@ -25,6 +25,10 @@ RUN pip3 install youtube-transcript-api requests --break-system-packages
 # Copy app source
 COPY . .
 
+# Copy .env file if it exists (for development/local testing)
+# In production, environment variables will be set via deployment platform
+COPY .env* ./
+
 # Expose port
 EXPOSE 8000
 
