@@ -1,0 +1,6 @@
+# Proxy /api requests to Render backend
+/api/*  https://BrainScript-kywh.onrender.com/api/:splat  200
+# Proxy /auth requests to Render backend
+/auth/*  https://BrainScript-kywh.onrender.com/auth/:splat  200
+# SPA Fallback
+/*  /index.html  200
