@@ -28,5 +28,8 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
+# Start the server
+CMD ["node", "server.js"]
+
 # Start server
 CMD ["npm", "start"]
