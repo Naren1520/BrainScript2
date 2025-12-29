@@ -56,11 +56,11 @@ import userFilesRoutes from "./src/routes/userFiles.js";
     // Session setup
     app.use(
       session({
-        name: "connect.sid", // Explicitly set cookie name
+        name: "connect.sid",
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
-        proxy: true, // Required for secure cookies behind a proxy (like Render/Netlify)
+        proxy: true,
         store: MongoStore.create({
           mongoUrl: process.env.MONGO_URI,
           collectionName: "sessions",
@@ -68,8 +68,8 @@ import userFilesRoutes from "./src/routes/userFiles.js";
         cookie: {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "lax", // ✅ Lax is fine because it's now a First-Party cookie via proxy
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+          sameSite: "lax",
+          maxAge: 1000 * 60 * 60 * 24 * 7,
         },
       })
     );
@@ -85,14 +85,18 @@ import userFilesRoutes from "./src/routes/userFiles.js";
       res.send("🚀 BrainScript server is running...");
     });
 
-    // PlAYLIST routes
+    // Health check endpoint (Render uses this)
+    app.get("/health", (req, res) => {
+      res.json({ status: "ok", timestamp: new Date().toISOString() });
+    });
 
+    // PlAYLIST routes
     app.use("/api/playlists", playlistRoutes);
 
     // Feed route
     app.use("/api/feed", feedRoutes);
 
-    // Player Contorls
+    // Player Controls
     app.use("/api/videos", videosRouter);
     app.use("/api/ai", aiRoutes);
     app.use("/api/user", userRoutes);
@@ -107,11 +111,45 @@ import userFilesRoutes from "./src/routes/userFiles.js";
       }
     });
 
+    // Error handling middleware
+    app.use((err, req, res, next) => {
+      console.error("❌ Error:", err.message);
+      res.status(500).json({ error: "Internal server error" });
+    });
+
     // Start server
     const PORT = process.env.PORT || 8000;
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`✅ Server is ready to accept requests`);
+    });
+
+    // Handle graceful shutdown
+    process.on("SIGTERM", () => {
+      console.log("⚠️  SIGTERM signal received: closing HTTP server");
+      server.close(() => {
+        console.log("✅ HTTP server closed");
+        process.exit(0);
+      });
+    });
+
+    process.on("SIGINT", () => {
+      console.log("⚠️  SIGINT signal received: closing HTTP server");
+      server.close(() => {
+        console.log("✅ HTTP server closed");
+        process.exit(0);
+      });
+    });
+
+    // Handle uncaught errors
+    process.on("uncaughtException", (error) => {
+      console.error("❌ Uncaught Exception:", error);
+      process.exit(1);
+    });
+
+    process.on("unhandledRejection", (reason, promise) => {
+      console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
     });
   } catch (error) {
     console.error("❌ Server initialization failed:", error.message);
