@@ -26,87 +26,96 @@ import userFilesRoutes from "./src/routes/userFiles.js";
 
 // Start server with async initialization
 (async () => {
-  const app = express();
+  try {
+    const app = express();
 
-// ✅ Connect to MongoDB first
-await connectDB();
+    // ✅ Connect to MongoDB first (with timeout)
+    await connectDB();
 
-// Middleware
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
-);
+    // Middleware
+    app.use(
+      cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+      })
+    );
 
-app.use(express.json());
+    app.use(express.json());
 
-// Serve static files for uploads
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    // Serve static files for uploads
+    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.set("trust proxy", true);
+    app.set("trust proxy", true);
 
-// Add referrer policy header
-app.use((req, res, next) => {
-  res.header("Referrer-Policy", "no-referrer-when-downgrade");
-  next();
-});
+    // Add referrer policy header
+    app.use((req, res, next) => {
+      res.header("Referrer-Policy", "no-referrer-when-downgrade");
+      next();
+    });
 
-// Session setup
-app.use(
-  session({
-    name: "connect.sid", // Explicitly set cookie name
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    proxy: true, // Required for secure cookies behind a proxy (like Render/Netlify)
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
-      collectionName: "sessions",
-    }),
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // ✅ Lax is fine because it's now a First-Party cookie via proxy
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    },
-  })
-);
+    // Session setup
+    app.use(
+      session({
+        name: "connect.sid", // Explicitly set cookie name
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        proxy: true, // Required for secure cookies behind a proxy (like Render/Netlify)
+        store: MongoStore.create({
+          mongoUrl: process.env.MONGO_URI,
+          collectionName: "sessions",
+        }),
+        cookie: {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax", // ✅ Lax is fine because it's now a First-Party cookie via proxy
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        },
+      })
+    );
 
-app.use(passport.initialize());
-app.use(passport.session());
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-// Routes
-app.use("/auth", authRoutes);
+    // Routes
+    app.use("/auth", authRoutes);
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("🚀 BrainScript server is running...");
-});
+    // Root route
+    app.get("/", (req, res) => {
+      res.send("🚀 BrainScript server is running...");
+    });
 
-// PlAYLIST routes
+    // PlAYLIST routes
 
-app.use("/api/playlists", playlistRoutes);
+    app.use("/api/playlists", playlistRoutes);
 
-// Feed route
-app.use("/api/feed", feedRoutes);
+    // Feed route
+    app.use("/api/feed", feedRoutes);
 
-// Player Contorls
-app.use("/api/videos", videosRouter);
-app.use("/api/ai", aiRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/user", userFilesRoutes);
+    // Player Contorls
+    app.use("/api/videos", videosRouter);
+    app.use("/api/ai", aiRoutes);
+    app.use("/api/user", userRoutes);
+    app.use("/api/user", userFilesRoutes);
 
-// Optional protected test route
-app.get("/private", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ success: true, message: "This is a protected route" });
-  } else {
-    res.status(401).json({ success: false, message: "Unauthorized" });
+    // Optional protected test route
+    app.get("/private", (req, res) => {
+      if (req.isAuthenticated()) {
+        res.json({ success: true, message: "This is a protected route" });
+      } else {
+        res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+    });
+
+    // Start server
+    const PORT = process.env.PORT || 8000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+  } catch (error) {
+    console.error("❌ Server initialization failed:", error.message);
+    console.error(error);
+    process.exit(1);
   }
-});
-
-// Start server
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 })();
