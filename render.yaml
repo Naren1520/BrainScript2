@@ -28,6 +28,10 @@ services:
         value: en,en-US,en-GB,en-IN,hi
       - key: GEMINI_API_KEY_QUIZ
         sync: false
+      - key: SUMMARY_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
