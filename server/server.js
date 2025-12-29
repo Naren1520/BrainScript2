@@ -24,10 +24,12 @@ import aiRoutes from "./src/routes/aiRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import userFilesRoutes from "./src/routes/userFiles.js";
 
-const app = express();
+// Start server with async initialization
+(async () => {
+  const app = express();
 
-// ✅ Connect to MongoDB
-connectDB();
+// ✅ Connect to MongoDB first
+await connectDB();
 
 // Middleware
 app.use(
@@ -105,5 +107,6 @@ app.get("/private", (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+})();
